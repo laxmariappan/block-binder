@@ -97,7 +97,7 @@ add_action( 'init', 'block_binder_register_binding_source' );
  * @return array Array of meta keys available for binding.
  */
 function block_binder_get_registered_meta_keys() {
-	global $wp_meta_keys;
+	global $wp_meta_keys, $wpdb;
 
 	$meta_keys = array();
 
@@ -111,9 +111,19 @@ function block_binder_get_registered_meta_keys() {
 		}
 	}
 
-	// Always include common custom meta keys.
-	$default_keys = array( 'book_author', '_description', '_featured_image_alt', '_custom_field' );
-	$meta_keys = array_unique( array_merge( $meta_keys, $default_keys ) );
+	// Discover meta keys from actual post meta in the database.
+	$discovered_keys = $wpdb->get_col(
+		"SELECT DISTINCT meta_key FROM {$wpdb->postmeta} WHERE post_id IN (
+			SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' OR post_status = 'draft'
+		) LIMIT 50"
+	);
+
+	if ( ! empty( $discovered_keys ) ) {
+		$meta_keys = array_merge( $meta_keys, $discovered_keys );
+	}
+
+	// Ensure unique keys and remove empty values.
+	$meta_keys = array_unique( array_filter( $meta_keys ) );
 
 	sort( $meta_keys );
 
