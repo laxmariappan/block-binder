@@ -137,15 +137,23 @@ function block_binder_rest_get_meta_keys() {
 	}
 
 	// Discover meta keys from actual post meta in the database.
-	$discovered_keys = $wpdb->get_col(
-		$wpdb->prepare(
-			"SELECT DISTINCT meta_key FROM {$wpdb->postmeta} WHERE post_id IN (
-				SELECT ID FROM {$wpdb->posts} WHERE post_status IN (%s, %s)
-			) LIMIT 50",
-			'publish',
-			'draft'
-		)
-	);
+	// Check cache first.
+	$cache_key = 'block_binder_meta_keys';
+	$discovered_keys = wp_cache_get( $cache_key );
+
+	if ( false === $discovered_keys ) {
+		$discovered_keys = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT meta_key FROM {$wpdb->postmeta} WHERE post_id IN (
+					SELECT ID FROM {$wpdb->posts} WHERE post_status IN (%s, %s)
+				) LIMIT 50",
+				'publish',
+				'draft'
+			)
+		);
+		// Cache for 1 hour.
+		wp_cache_set( $cache_key, $discovered_keys, '', HOUR_IN_SECONDS );
+	}
 
 	if ( ! empty( $discovered_keys ) ) {
 		$meta_keys = array_merge( $meta_keys, $discovered_keys );
