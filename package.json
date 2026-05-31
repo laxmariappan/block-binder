@@ -1,0 +1,26 @@
+{
+  "name": "block-binder",
+  "version": "1.0.0",
+  "description": "Visually bind post meta to core blocks using the Block Bindings API",
+  "author": "Lax Mariappan",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "lint": "wp-scripts lint-js",
+    "format": "wp-scripts format-js"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^27.0.0"
+  },
+  "dependencies": {
+    "@wordpress/api-fetch": "^7.0.0",
+    "@wordpress/blocks": "^12.0.0",
+    "@wordpress/components": "^25.0.0",
+    "@wordpress/data": "^9.0.0",
+    "@wordpress/edit-post": "^7.0.0",
+    "@wordpress/element": "^5.0.0",
+    "@wordpress/plugins": "^6.0.0",
+    "@wordpress/dom-ready": "^3.0.0"
+  }
+}
