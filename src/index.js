@@ -12,7 +12,8 @@ import {
 } from '@wordpress/components';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * BlockBinderPanel Component
@@ -88,6 +89,34 @@ function BlockBinderPanel() {
 	// State for selected attribute and meta key.
 	const [ selectedAttribute, setSelectedAttribute ] = useState( '' );
 	const [ selectedMetaKey, setSelectedMetaKey ] = useState( '' );
+	const [ metaKeys, setMetaKeys ] = useState( [] );
+	const [ isLoadingMetaKeys, setIsLoadingMetaKeys ] = useState( false );
+
+	// Fetch meta keys from REST API on component mount.
+	useEffect( () => {
+		const fetchMetaKeys = async () => {
+			if ( ! window.blockBinderData?.restUrl ) {
+				return;
+			}
+
+			setIsLoadingMetaKeys( true );
+			try {
+				const response = await apiFetch( {
+					path: window.blockBinderData.restUrl,
+					headers: {
+						'X-WP-Nonce': window.blockBinderData.nonce,
+					},
+				} );
+				setMetaKeys( response.meta_keys || [] );
+			} catch ( error ) {
+				console.error( 'Failed to fetch meta keys:', error );
+			} finally {
+				setIsLoadingMetaKeys( false );
+			}
+		};
+
+		fetchMetaKeys();
+	}, [] );
 
 	// Current binding (if any).
 	const currentBindings = selectedBlock?.attributes?.metadata?.bindings || {};
@@ -167,13 +196,14 @@ function BlockBinderPanel() {
 					label={ __( 'Post Meta Key', 'block-binder' ) }
 					value={ selectedMetaKey }
 					options={ [
-						{ label: __( 'Select a meta key...', 'block-binder' ), value: '' },
-						...( window.blockBinderData?.metaKeys || [] ).map( ( key ) => ( {
+						{ label: isLoadingMetaKeys ? __( 'Loading...', 'block-binder' ) : __( 'Select a meta key...', 'block-binder' ), value: '' },
+						...metaKeys.map( ( key ) => ( {
 							label: key,
 							value: key,
 						} ) ),
 					] }
 					onChange={ setSelectedMetaKey }
+					disabled={ isLoadingMetaKeys }
 				/>
 
 				<Button

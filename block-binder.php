@@ -41,8 +41,7 @@ function block_binder_enqueue_assets() {
 		true
 	);
 
-	// Localize script with available post meta keys.
-	$meta_keys = block_binder_get_registered_meta_keys();
+	// Localize script with REST endpoint and config.
 	wp_localize_script(
 		'block-binder-sidebar',
 		'blockBinderData',
@@ -66,7 +65,8 @@ function block_binder_enqueue_assets() {
 				'core/verse',
 			),
 			'postId'          => get_the_ID(),
-			'metaKeys'        => $meta_keys,
+			'restUrl'         => rest_url( 'block-binder/v1/meta-keys' ),
+			'nonce'           => wp_create_nonce( 'wp_rest' ),
 		)
 	);
 }
@@ -92,11 +92,36 @@ function block_binder_register_binding_source() {
 add_action( 'init', 'block_binder_register_binding_source' );
 
 /**
- * Get all registered post meta keys.
- *
- * @return array Array of meta keys available for binding.
+ * Register REST API endpoint for meta keys.
  */
-function block_binder_get_registered_meta_keys() {
+function block_binder_register_rest_endpoint() {
+	register_rest_route(
+		'block-binder/v1',
+		'/meta-keys',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'block_binder_rest_get_meta_keys',
+			'permission_callback' => 'block_binder_check_edit_posts_capability',
+		)
+	);
+}
+add_action( 'rest_api_init', 'block_binder_register_rest_endpoint' );
+
+/**
+ * Permission callback for REST endpoint.
+ *
+ * @return bool True if user can edit posts.
+ */
+function block_binder_check_edit_posts_capability() {
+	return current_user_can( 'edit_posts' );
+}
+
+/**
+ * REST callback to get meta keys.
+ *
+ * @return WP_REST_Response Array of meta keys.
+ */
+function block_binder_rest_get_meta_keys() {
 	global $wp_meta_keys, $wpdb;
 
 	$meta_keys = array();
@@ -113,9 +138,13 @@ function block_binder_get_registered_meta_keys() {
 
 	// Discover meta keys from actual post meta in the database.
 	$discovered_keys = $wpdb->get_col(
-		"SELECT DISTINCT meta_key FROM {$wpdb->postmeta} WHERE post_id IN (
-			SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' OR post_status = 'draft'
-		) LIMIT 50"
+		$wpdb->prepare(
+			"SELECT DISTINCT meta_key FROM {$wpdb->postmeta} WHERE post_id IN (
+				SELECT ID FROM {$wpdb->posts} WHERE post_status IN (%s, %s)
+			) LIMIT 50",
+			'publish',
+			'draft'
+		)
 	);
 
 	if ( ! empty( $discovered_keys ) ) {
@@ -127,7 +156,7 @@ function block_binder_get_registered_meta_keys() {
 
 	sort( $meta_keys );
 
-	return $meta_keys;
+	return new WP_REST_Response( array( 'meta_keys' => $meta_keys ), 200 );
 }
 
 /**
