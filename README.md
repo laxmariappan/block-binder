@@ -7,6 +7,9 @@
 
 Visually bind post meta to core WordPress blocks using the **Block Bindings API**. No code required.
 
+<img width="619" height="204" alt="image" src="https://github.com/user-attachments/assets/8e29fa65-50a8-4dbc-93c3-6a70feed3ee5" />
+
+
 ## Overview
 
 Block Binder provides a user-friendly sidebar panel in the WordPress block editor that lets you:
