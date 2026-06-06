@@ -9,3 +9,15 @@ build/
 .vscode/
 *.swp
 *.swo
+
+# ========================================
+# BEGIN Explicitly Allowed Files
+# ========================================
+# Track .wordpress-org assets for deployment
+!.wordpress-org/
+!.wordpress-org/**/*.png
+!.wordpress-org/**/*.jpg
+!.wordpress-org/**/*.jpeg
+!.wordpress-org/**/*.gif
+!.wordpress-org/**/*.svg
+!.wordpress-org/**/*.md
