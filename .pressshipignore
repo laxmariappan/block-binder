@@ -1,0 +1,5 @@
+.wordpress-org
+src
+package.json
+package-lock.json
+README.md

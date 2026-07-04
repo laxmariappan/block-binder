@@ -142,6 +142,7 @@ function block_binder_rest_get_meta_keys() {
 	$discovered_keys = wp_cache_get( $cache_key );
 
 	if ( false === $discovered_keys ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- No WP API exists to discover all distinct meta keys across posts.
 		$discovered_keys = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT DISTINCT meta_key FROM {$wpdb->postmeta} WHERE post_id IN (
