@@ -1,19 +1,19 @@
 <?php
 /**
- * Plugin Name: Block Binder
- * Plugin URI: https://laxmariappan.com/block-binder
+ * Plugin Name: Lax Block Binder
+ * Plugin URI: https://github.com/laxmariappan/block-binder
  * Description: Visually bind post meta to core blocks using the Block Bindings API
  * Version: 1.0.0
  * Author: Lax Mariappan
  * Author URI: https://laxmariappan.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: block-binder
+ * Text Domain: lax-block-binder
  * Domain Path: /languages
  * Requires at least: 6.5
  * Requires PHP: 7.4
  *
- * @package BlockBinder
+ * @package LaxBlockBinder
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Enqueue the block editor sidebar script.
  */
-function block_binder_enqueue_assets() {
+function laxbb_enqueue_assets() {
 	// Only load in the block editor context.
 	if ( ! is_admin() ) {
 		return;
@@ -34,7 +34,7 @@ function block_binder_enqueue_assets() {
 
 	// Enqueue the compiled sidebar script.
 	wp_enqueue_script(
-		'block-binder-sidebar',
+		'laxbb-sidebar',
 		plugins_url( 'build/index.js', __FILE__ ),
 		array( 'wp-plugins', 'wp-edit-post', 'wp-blocks', 'wp-data', 'wp-element' ),
 		filemtime( plugin_dir_path( __FILE__ ) . 'build/index.js' ),
@@ -43,8 +43,8 @@ function block_binder_enqueue_assets() {
 
 	// Localize script with REST endpoint and config.
 	wp_localize_script(
-		'block-binder-sidebar',
-		'blockBinderData',
+		'laxbb-sidebar',
+		'laxbbData',
 		array(
 			'supportedBlocks' => array(
 				'core/paragraph',
@@ -65,54 +65,54 @@ function block_binder_enqueue_assets() {
 				'core/verse',
 			),
 			'postId'          => get_the_ID(),
-			'restUrl'         => rest_url( 'block-binder/v1/meta-keys' ),
+			'restUrl'         => rest_url( 'lax-block-binder/v1/meta-keys' ),
 			'nonce'           => wp_create_nonce( 'wp_rest' ),
 		)
 	);
 }
-add_action( 'enqueue_block_assets', 'block_binder_enqueue_assets' );
+add_action( 'enqueue_block_assets', 'laxbb_enqueue_assets' );
 
 /**
  * Register the custom binding source for post meta.
  */
-function block_binder_register_binding_source() {
+function laxbb_register_binding_source() {
 	// Only register on WordPress 6.5+.
 	if ( ! function_exists( 'register_block_bindings_source' ) ) {
 		return;
 	}
 
 	register_block_bindings_source(
-		'block-binder/post-meta',
+		'lax-block-binder/post-meta',
 		array(
-			'label'              => __( 'Post Meta (Block Binder)', 'block-binder' ),
-			'get_value_callback' => 'block_binder_get_meta_value',
+			'label'              => __( 'Post Meta (Lax Block Binder)', 'lax-block-binder' ),
+			'get_value_callback' => 'laxbb_get_meta_value',
 		)
 	);
 }
-add_action( 'init', 'block_binder_register_binding_source' );
+add_action( 'init', 'laxbb_register_binding_source' );
 
 /**
  * Register REST API endpoint for meta keys.
  */
-function block_binder_register_rest_endpoint() {
+function laxbb_register_rest_endpoint() {
 	register_rest_route(
-		'block-binder/v1',
+		'lax-block-binder/v1',
 		'/meta-keys',
 		array(
 			'methods'             => 'GET',
-			'callback'            => 'block_binder_rest_get_meta_keys',
-			'permission_callback' => 'block_binder_check_edit_posts_capability',
+			'callback'            => 'laxbb_rest_get_meta_keys',
+			'permission_callback' => 'laxbb_check_edit_posts_capability',
 		)
 	);
 }
-add_action( 'rest_api_init', 'block_binder_register_rest_endpoint' );
+add_action( 'rest_api_init', 'laxbb_register_rest_endpoint' );
 
 /**
  * Permission callback for REST endpoint.
  *
  * @return bool True if user can edit posts.
  */
-function block_binder_check_edit_posts_capability() {
+function laxbb_check_edit_posts_capability() {
 	return current_user_can( 'edit_posts' );
 }
 
@@ -121,7 +121,7 @@ function block_binder_check_edit_posts_capability() {
  *
  * @return WP_REST_Response Array of meta keys.
  */
-function block_binder_rest_get_meta_keys() {
+function laxbb_rest_get_meta_keys() {
 	global $wp_meta_keys, $wpdb;
 
 	$meta_keys = array();
@@ -138,7 +138,7 @@ function block_binder_rest_get_meta_keys() {
 
 	// Discover meta keys from actual post meta in the database.
 	// Check cache first.
-	$cache_key = 'block_binder_meta_keys';
+	$cache_key = 'laxbb_meta_keys';
 	$discovered_keys = wp_cache_get( $cache_key );
 
 	if ( false === $discovered_keys ) {
@@ -171,12 +171,12 @@ function block_binder_rest_get_meta_keys() {
 /**
  * Callback to retrieve post meta values for block bindings.
  *
- * @param array $source_attrs The source attributes (should include 'key' for the meta key).
+ * @param array  $source_attrs The source attributes (should include 'key' for the meta key).
  * @param object $block_instance The block instance.
  * @param string $attribute_name The attribute name being bound.
  * @return mixed The meta value or null if not found.
  */
-function block_binder_get_meta_value( $source_attrs, $block_instance, $attribute_name ) {
+function laxbb_get_meta_value( $source_attrs, $block_instance, $attribute_name ) {
 	if ( empty( $source_attrs['key'] ) ) {
 		return null;
 	}

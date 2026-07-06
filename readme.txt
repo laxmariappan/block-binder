@@ -1,5 +1,5 @@
-=== Block Binder ===
-Contributors: laxmariappan
+=== Lax Block Binder ===
+Contributors: lakshmananphp
 Tags: block-bindings, blocks, gutenberg, post-meta, custom-fields
 Requires at least: 6.5
 Requires PHP: 7.4
@@ -143,11 +143,11 @@ Yes. Block Binder works with any post type that uses the block editor and has po
 
 == Technical Details ==
 
-**Custom Binding Source:** `block-binder/post-meta`
+**Custom Binding Source:** `lax-block-binder/post-meta`
 - Registered via `register_block_bindings_source()`
 - Retrieves post meta values via `get_post_meta()`
 
-**REST Endpoint:** `GET /wp-json/block-binder/v1/meta-keys`
+**REST Endpoint:** `GET /wp-json/lax-block-binder/v1/meta-keys`
 - Requires `edit_posts` capability
 - Returns array of available meta keys
 - Secured with WordPress nonce verification
@@ -160,11 +160,11 @@ Yes. Block Binder works with any post type that uses the block editor and has po
 == Support ==
 
 For bug reports, feature requests, or questions, please visit:
-https://github.com/laxmariappan/block-binder
+https://github.com/laxmariappan/lax-block-binder
 
 == License ==
 
-Block Binder is licensed under the GPL v2 or later.
+Lax Block Binder is licensed under the GPL v2 or later.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

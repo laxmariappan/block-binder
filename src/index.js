@@ -44,7 +44,7 @@ function BlockBinderPanel() {
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 
 	// List of supported blocks.
-	const supportedBlocks = window.blockBinderData?.supportedBlocks || [
+	const supportedBlocks = window.laxbbData?.supportedBlocks || [
 		'core/paragraph',
 		'core/heading',
 		'core/image',
@@ -95,16 +95,16 @@ function BlockBinderPanel() {
 	// Fetch meta keys from REST API on component mount.
 	useEffect( () => {
 		const fetchMetaKeys = async () => {
-			if ( ! window.blockBinderData?.restUrl ) {
+			if ( ! window.laxbbData?.restUrl ) {
 				return;
 			}
 
 			setIsLoadingMetaKeys( true );
 			try {
 				const response = await apiFetch( {
-					path: window.blockBinderData.restUrl,
+					path: window.laxbbData.restUrl,
 					headers: {
-						'X-WP-Nonce': window.blockBinderData.nonce,
+						'X-WP-Nonce': window.laxbbData.nonce,
 					},
 				} );
 				setMetaKeys( response.meta_keys || [] );
@@ -132,7 +132,7 @@ function BlockBinderPanel() {
 		const bindings = metadata.bindings || {};
 
 		bindings[ attributeName ] = {
-			source: 'block-binder/post-meta',
+		source: 'lax-block-binder/post-meta',
 			args: {
 				key: metaKey,
 			},
@@ -164,26 +164,26 @@ function BlockBinderPanel() {
 	// If no block is selected or block is not supported, show message.
 	if ( ! isSupported ) {
 		return (
-			<PluginDocumentSettingPanel title={ __( 'Block Binder', 'block-binder' ) } icon="admin-links">
+			<PluginDocumentSettingPanel title={ __( 'Block Binder', 'lax-block-binder' ) } icon="admin-links">
 				<Text>
-					{ __( 'Select a supported block (Paragraph, Heading, Image, or Button) to bind post meta.', 'block-binder' ) }
+					{ __( 'Select a supported block (Paragraph, Heading, Image, or Button) to bind post meta.', 'lax-block-binder' ) }
 				</Text>
 			</PluginDocumentSettingPanel>
 		);
 	}
 
 	return (
-		<PluginDocumentSettingPanel title={ __( 'Block Binder', 'block-binder' ) } icon="admin-links">
+		<PluginDocumentSettingPanel title={ __( 'Block Binder', 'lax-block-binder' ) } icon="admin-links">
 			<VStack spacing={ 3 }>
 				<Text variant="subtitle">
 					{ selectedBlockName }
 				</Text>
 
 				<SelectControl
-					label={ __( 'Block Attribute to Bind', 'block-binder' ) }
+					label={ __( 'Block Attribute to Bind', 'lax-block-binder' ) }
 					value={ selectedAttribute }
 					options={ [
-						{ label: __( 'Select an attribute...', 'block-binder' ), value: '' },
+						{ label: __( 'Select an attribute...', 'lax-block-binder' ), value: '' },
 						...attributeOptions.map( ( attr ) => ( {
 							label: attr,
 							value: attr,
@@ -193,10 +193,10 @@ function BlockBinderPanel() {
 				/>
 
 				<SelectControl
-					label={ __( 'Post Meta Key', 'block-binder' ) }
+					label={ __( 'Post Meta Key', 'lax-block-binder' ) }
 					value={ selectedMetaKey }
 					options={ [
-						{ label: isLoadingMetaKeys ? __( 'Loading...', 'block-binder' ) : __( 'Select a meta key...', 'block-binder' ), value: '' },
+						{ label: isLoadingMetaKeys ? __( 'Loading...', 'lax-block-binder' ) : __( 'Select a meta key...', 'lax-block-binder' ), value: '' },
 						...metaKeys.map( ( key ) => ( {
 							label: key,
 							value: key,
@@ -216,7 +216,7 @@ function BlockBinderPanel() {
 						}
 					} }
 				>
-					{ __( 'Bind', 'block-binder' ) }
+					{ __( 'Bind', 'lax-block-binder' ) }
 				</Button>
 
 				{ existingBoundAttribute && Object.keys( currentBindings ).length > 0 && (
@@ -225,10 +225,10 @@ function BlockBinderPanel() {
 							isDestructive
 							onClick={ () => handleUnbind( existingBoundAttribute ) }
 						>
-							{ __( 'Unbind', 'block-binder' ) }
+							{ __( 'Unbind', 'lax-block-binder' ) }
 						</Button>
 						<Text variant="caption">
-							{ __( 'Current binding:', 'block-binder' ) } { existingBoundAttribute } → { currentBindings[ existingBoundAttribute ].args?.key }
+							{ __( 'Current binding:', 'lax-block-binder' ) } { existingBoundAttribute } → { currentBindings[ existingBoundAttribute ].args?.key }
 						</Text>
 					</>
 				) }
@@ -238,6 +238,6 @@ function BlockBinderPanel() {
 }
 
 // Register the plugin and panel.
-registerPlugin( 'block-binder-panel', {
+registerPlugin( 'laxbb-panel', {
 	render: BlockBinderPanel,
 } );
